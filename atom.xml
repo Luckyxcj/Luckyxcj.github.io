@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>blackwhite</title>
   
-  
+  <subtitle>black cat and white cat</subtitle>
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blackwhite.work/"/>
