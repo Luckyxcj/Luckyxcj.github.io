@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>blackwhite</title>
+  
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://blackwhite.work/"/>
+  <updated>2019-06-18T15:13:13.850Z</updated>
+  <id>http://blackwhite.work/</id>
+  
+  <author>
+    <name>Lucky</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://blackwhite.work/2019/06/18/hello-world/"/>
+    <id>http://blackwhite.work/2019/06/18/hello-world/</id>
+    <published>2019-06-18T15:13:13.850Z</published>
+    <updated>2019-06-18T15:13:13.850Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+</feed>
