@@ -1,0 +1,26 @@
+{
+  "name": "luckyxcj.github.io",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vitepress dev docs",
+  "build": "vitepress build docs",
+  "preview": "vitepress preview docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Luckyxcj/Luckyxcj.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Luckyxcj/Luckyxcj.github.io/issues"
+  },
+  "homepage": "https://github.com/Luckyxcj/Luckyxcj.github.io#readme",
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  }
+}
