@@ -70,6 +70,15 @@ export default defineConfig({
             { text: '概览', link: '/protocols/' },
           ],
         },
+        {
+          text: 'CAN 总线',
+          collapsed: false,
+          items: [
+            { text: 'CAN 网络基础', link: '/protocols/can/basics' },
+            { text: 'STM32 CAN 指南', link: '/protocols/can/stm32' },
+            { text: '故障排查', link: '/protocols/can/troubleshooting' },
+          ],
+        },
       ],
       '/peripherals/': [
         {
