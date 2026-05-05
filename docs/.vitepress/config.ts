@@ -106,6 +106,14 @@ export default defineConfig({
             { text: '概览', link: '/actuators/' },
           ],
         },
+        {
+          text: '液压控制',
+          collapsed: false,
+          items: [
+            { text: '概览', link: '/actuators/hydraulic/' },
+            { text: '比例阀技术说明', link: '/actuators/hydraulic/proportional-valve' },
+          ],
+        },
       ],
       '/algorithms/': [
         {
