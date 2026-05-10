@@ -347,13 +347,28 @@ void SystemInit(void) {
 
 ## 7. 参考文档
 
-1. [STM32 产品选择器 (ST 官网)](https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html)
-2. ST AN2606: STM32 系统存储器启动模式 — Bootloader 协议定义
-3. ST AN4661: STM32F7 系列从 F4/F2/F1 的迁移指南
-4. ST AN4899: STM32G0 系列从 F0 的迁移指南
-5. ST AN5093: STM32G4 系列从 F3 的迁移指南
-6. RM0008: STM32F1xx 参考手册
-7. RM0090: STM32F4xx 参考手册
-8. RM0440: STM32G4xx 参考手册
-9. RM0455: STM32H7A3/B3 参考手册
-10. [Arm Cortex-M Processor Comparison](https://developer.arm.com/Processors/Cortex-M)
+### 应用笔记 (Application Notes)
+
+| 编号 | 标题 | 链接 |
+|------|------|------|
+| AN2606 | STM32 系统存储器启动模式 — Bootloader 协议定义 | [PDF](https://www.st.com/resource/en/application_note/an2606-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf) |
+| AN4661 | STM32F7 系列硬件开发入门 | [PDF](https://www.st.com/resource/en/application_note/an4661-getting-started-with-stm32f7-series-mcu-hardware-development-stmicroelectronics.pdf) |
+| AN4660 | STM32F4 → F7 迁移指南 (F4/F2/F1 至 F7) | [PDF](https://www.st.com/resource/en/application_note/an4660-migration-of-microcontroller-applications-from-stm32f42xxx-f43xxx-to-stm32f7-series-stmicroelectronics.pdf) |
+| AN4899 | STM32G0 系列从 F0 的迁移指南 | [PDF](https://www.st.com/resource/en/application_note/an4899-migration-from-stm32f0-to-stm32g0-microcontrollers-stmicroelectronics.pdf) |
+| AN5094 | STM32G4 系列从 F3 的迁移指南 | [PDF](https://www.st.com/resource/en/application_note/an5094-migrating-between-stm32f334303-lines-and-stm32g431xx-g474xx-g491xx-microcontrollers-stmicroelectronics.pdf) |
+
+### 参考手册 (Reference Manuals)
+
+| 编号 | 标题 | 链接 |
+|------|------|------|
+| RM0008 | STM32F1xx 参考手册 | [PDF](https://www.st.com/resource/en/reference_manual/rm0008-stm32f10xxx-reference-manual-stmicroelectronics.pdf) |
+| RM0090 | STM32F4xx 参考手册 | [PDF](https://www.st.com/resource/en/reference_manual/rm0090-stm32f405415-stm32f407417-stm32f427437-and-stm32f429439-advanced-armbased-32bit-mcus-stmicroelectronics.pdf) |
+| RM0440 | STM32G4xx 参考手册 | [PDF](https://www.st.com/resource/en/reference_manual/rm0440-stm32g4-series-advanced-armbased-32bit-mcus-stmicroelectronics.pdf) |
+| RM0455 | STM32H7A3/B3 参考手册 | [PDF](https://www.st.com/resource/en/reference_manual/rm0455-stm32h7a37b3-and-stm32h7b0-value-line-advanced-armbased-32bit-mcus-stmicroelectronics.pdf) |
+
+### 其他资源
+
+- [STM32 产品选择器 (ST 官网)](https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html)
+- [Arm Cortex-M 处理器对比](https://developer.arm.com/Processors/Cortex-M)
+
+> **注意**：原文中的 AN4661 实际标题为 STM32F7 硬件开发入门，F4→F7 迁移指南为 AN4660，已在表中补充。AN5093 应为 AN5094，已修正。
