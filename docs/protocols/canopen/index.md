@@ -31,7 +31,7 @@ CANopen 是基于 CAN 总线的**高层应用协议**，由 CiA (CAN in Automati
 | [CANopen 基础](basics.md) | 协议概述、对象字典结构、NMT 网络管理状态机 | 入门必读 |
 | [CANopen 通信机制](communication.md) | SDO/PDO 详解、SYNC/EMCY/Heartbeat、SDO 分段与块传输 | 通信理解 |
 | [CiA 402 电机驱动标准](cia402.md) | 控制状态机、运行模式、CSP 实战流程、模式切换 | 电机控制开发 |
-| [CANopen 开发实战](development.md) | STM32 主站实现、从站协议栈移植、多轴同步插补、回零 | 代码编写 |
+| [CANopen 开发实战](development.md) | STM32 主站实现、CANopenEditor 工具、从站协议栈移植、多轴同步插补、回零 | 代码编写 |
 | [CANopen 生态与工具](ecosystem.md) | 驱动器配置、抓包分析、EDS 解析、python-can 调试、周边协议 | 调试与选型 |
 
 ## 快速导航

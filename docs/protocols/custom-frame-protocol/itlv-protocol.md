@@ -72,6 +72,39 @@
 
 **最小帧长度**：2（Head）+ 1（ID）+ 1（Type）+ 1（Length）+ 0（Value）+ 2（CRC）= **7 字节**
 
+### 3.1 帧结构示意图
+
+```
++------+------+------+--------+------------------+-----------+
+| Head |  ID  | Type | Length | Value/Payload    | CRC16     |
++------+------+------+--------+------------------+-----------+
+| 0x55 | 1B   | 1B   | 1B     | N 字节 (0~255)   | 2B 小端   |
+| 0xAA |      |      |        |                  |           |
++------+------+------+--------+------------------+-----------+
+|<-- 固定头部 (5B) -->|<-- 变长数据 --->|<-- 校验 (2B) -->|
+```
+
+### 3.2 组包与解包流程
+
+```mermaid
+flowchart LR
+    subgraph 组包
+        A[业务数据] --> B[填充 ID/Type/Length]
+        B --> C[计算 CRC16]
+        C --> D[添加帧头]
+        D --> E[输出完整帧]
+    end
+
+    subgraph 解包
+        E --> F[校验帧头]
+        F --> G[提取 ID/Type/Length]
+        G --> H[验证 CRC16]
+        H --> I{校验通过?}
+        I -->|是| J[提取 Payload]
+        I -->|否| K[丢弃帧]
+    end
+```
+
 ---
 
 ## 4. 数据结构设计
@@ -164,6 +197,24 @@ typedef struct
     uint16_t     index;                     // 当前接收索引
     uint8_t      payload_len;               // 期望的负载长度
 } protocol_parser_t;
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> IDLE: 初始化
+    IDLE --> HEAD1: 收到 0x55
+    IDLE --> IDLE: 其他字节(噪声过滤)
+    HEAD1 --> HEAD2: 收到 0xAA
+    HEAD1 --> IDLE: 其他字节
+    HEAD2 --> RECV_ID: 接收 ID
+    RECV_ID --> RECV_TYPE: 接收 Type
+    RECV_TYPE --> RECV_LEN: 接收 Length
+    RECV_LEN --> RECV_PAYLOAD: 根据 Length 接收 Payload
+    RECV_PAYLOAD --> RECV_CRC_L: 接收 CRC 低字节
+    RECV_CRC_L --> RECV_CRC_H: 接收 CRC 高字节
+    RECV_CRC_H --> VALIDATE: 校验 CRC
+    VALIDATE --> IDLE: 校验成功,帧完成
+    VALIDATE --> IDLE: 校验失败,丢弃帧
 ```
 
 ---
@@ -361,3 +412,9 @@ for (size_t i = 0; i < frame_len; i++)
 - 关于两种解析方式的详细对比，请参阅 [流式解析 vs 批量解析](./stream-vs-batch-parsing)
 - 关于更轻量的转义编码方案，请参阅 [转义协议](./escape-protocol)
 :::
+
+---
+
+## 参考来源
+
+- [嵌入式大杂烩 - 简易嵌入式自定义协议设计思路](https://mp.weixin.qq.com/s/NQPatQBHTWRS18O2qPSVyA)

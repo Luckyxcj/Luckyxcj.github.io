@@ -43,4 +43,4 @@ CDC/HID/MSC 设备类、STM32 USB Device/Host 开发、描述符解析
 三者的协议层对比、电平转换方案、多主仲裁、速率距离权衡
 
 ### [MCU 自定义通信协议](./custom-frame-protocol/)
-转义协议、ITLV 类型化协议、流式 vs 批量解析对比 — [转义协议](./custom-frame-protocol/escape-protocol) · [ITLV 协议](./custom-frame-protocol/itlv-protocol) · [流式 vs 批量解析](./custom-frame-protocol/stream-vs-batch-parsing)
+流式 vs 批量解析、转义协议、ITLV 类型化协议 — [流式 vs 批量解析](./custom-frame-protocol/stream-vs-batch-parsing) · [转义协议](./custom-frame-protocol/escape-protocol) · [ITLV 协议](./custom-frame-protocol/itlv-protocol)

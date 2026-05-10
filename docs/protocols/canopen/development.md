@@ -1,6 +1,6 @@
 # CANopen 开发实战
 
-本文档面向需要在嵌入式平台实现 CANopen 主站/从站的开发者，包含 STM32 裸机和 FreeRTOS 下的主站实现、开源从站协议栈移植、多轴同步插补算法、以及 CiA 402 回零模式的完整应用。
+本文档面向需要在嵌入式平台实现 CANopen 主站/从站的开发者，包含 STM32 裸机和 FreeRTOS 下的主站实现、CANopenEditor 对象字典配置工具、开源从站协议栈移植、多轴同步插补算法、以及 CiA 402 回零模式的完整应用。
 
 ---
 
@@ -567,9 +567,224 @@ Excel 编辑 (ObjDict.xlsx)
 
 ---
 
-## 5. 多轴同步插补
+## 5. CANopenEditor 对象字典配置工具
 
-### 5.1 同步机制
+CANopenEditor 是 CANopenNode 官方提供的对象字典可视化编辑工具，可替代手动修改，简化对象字典的配置过程，并一键生成可直接编译的 C 源文件。
+
+### 5.1 工具获取
+
+- **GitHub 仓库**：https://github.com/CANopenNode/CANopenEditor
+- **下载地址**：https://github.com/CANopenNode/CANopenEditor/releases
+
+**使用步骤：**
+
+1. 下载并解压 `CANopenEditor-v4.2.3-binary.zip` 工具包
+2. 运行 `CANopenEditor-v4.2.3-binary/net8.0-windows/EDSEditor.exe` 启动编辑器
+3. 通过菜单 **File → Open**，导入 `CANopenEditor-v4.2.3-binary/net8.0-windows/Profiles/DS301_profile.xpd` 协议模板
+
+导入成功后界面如下：
+
+![CANopenEditor 界面总览](/images/canopen-editor/01-overview.jpg)
+
+**配置菜单栏介绍：**
+
+| 区域 | 说明 |
+|------|------|
+| **Device Info** | 模板字典的基本信息 |
+| **Object Dictionary** | 对象字典具体内容定义，包含每个对象及其含义（核心区域） |
+| **TX PDO Mapping** | 发送 PDO 映射关系 |
+| **RX PDO Mapping** | 接收 PDO 映射关系 |
+| **Modules** | 可忽略 |
+
+### 5.2 对象字典配置
+
+进入 **Object Dictionary** 目录：
+
+![Object Dictionary 目录](/images/canopen-editor/02-menu-intro.png)
+
+**菜单选项说明：**
+
+| 区域 | 说明 |
+|------|------|
+| **Communication Specific Parameters** | 通信相关参数及通用参数定义 |
+| **Manufacturer Specific Parameters** | 设备或功能相关参数 |
+| **Device Profile Specific Parameters** | 行业协议相关参数（如 DS402/DS401） |
+
+#### 5.2.1 配置标准对象参数
+
+左侧 Object Directory 目录下，已有部分标准对象参数（置灰表示已有定义但未使能）。以对象 `0x1008`（Manufacturer device name）为例：
+
+![对象 0x1008 配置](/images/canopen-editor/03-object-dict.png)
+
+**配置区域说明：**
+
+![对象属性详解](/images/canopen-editor/04-object-1008.png)
+
+| 区域 | 说明 |
+|------|------|
+| **① 对象状态** | 置灰表示未使能，导出时不会包含 |
+| **② 对象属性（只读）** | Name、Obj Type（VAR/ARRAY/RECORD）、Data Type、SDO/PDO 访问权限、Default Value |
+| **③ 名称与描述** | 对象名称和描述配置 |
+| **④ 对象属性配置** | 最重要的配置区域 |
+
+**关键配置参数：**
+
+| 参数 | 说明 |
+|------|------|
+| **Count Label** | 参数归属的协议类型 |
+| **Storage Group** | 存储属性：`PERSIST_COMM`（选择性持久化）、`ROM`、`RAM` |
+| **Enabled** | 勾选以使能该对象 |
+
+**对象 0x1008 配置示例：**
+
+![对象属性配置](/images/canopen-editor/05-object-attr.png)
+
+修改以下属性：
+- **Default Value**: `HPMICRO Canopen Demo`
+- **Access SDO**: `rw`
+- **Enabled**: 勾选
+
+### 5.3 生成的对象字典文件
+
+配置完成后导出 OD.c/OD.h 文件，以对象 0x1008 为例：
+
+#### 5.3.1 OD.c 文件结构
+
+![OD.c 结构](/images/canopen-editor/06-odc-structure.png)
+
+| 结构体 | 说明 |
+|--------|------|
+| **OD_PERSIST_COMM** | 选择性持久化通信参数，对象 0x1008 定义在此 |
+| **OD_RAM** | 存储属性为 RAM 的对象 |
+| **ODObjs** | 描述所有对象的参数类型、访问属性和参数长度 |
+| **OD** | 最终通过此结构体指针对 map 进行读写 |
+
+#### 5.3.2 OD.h 文件结构
+
+![OD.h 宏定义](/images/canopen-editor/07-odh-macros.png)
+
+OD.h 定义了 OD.c 中用到的所有变量和结构体，以及协议对象数量的宏定义：
+
+```c
+// 示例：各协议涉及的对象数量
+#define OD_CNT_NMT      1    // NMT 协议对象数量（必须 ≥ 1）
+#define OD_CNT_SDO_SRV  1    // SDO 服务器数量
+#define OD_CNT_RPDO     1    // RPDO 数量
+#define OD_CNT_TPDO     1    // TPDO 数量
+```
+
+::: warning 注意
+`OD_CNT_NMT` 必须大于等于 1，否则会报错。
+:::
+
+### 5.4 新增自定义对象参数
+
+默认配置中所有 PDO 的映射参数均为空，需要定义应用对象并配置到 PDO 映射表。
+
+#### 5.4.1 创建新对象
+
+在 **Manufacturer Specific Parameters** 区域，右键 Name 选择 **Add**：
+
+![添加新对象](/images/canopen-editor/08-add-object.png)
+
+**Create new OD Index 对话框配置：**
+
+| 参数 | 值 |
+|------|-----|
+| **Index** | 2102 |
+| **Name** | PDO_Para |
+| **Object Type** | VAR |
+
+#### 5.4.2 配置对象属性
+
+![新对象属性配置](/images/canopen-editor/09-new-object-attr.png)
+
+| 参数 | 值 |
+|------|-----|
+| **Default Value** | 0xAA |
+| **Data Type** | UNSIGNED32 |
+| **Access SDO** | rw |
+| **Access PDO** | rw |
+| **Storage Group** | RAM |
+| **Enabled** | 勾选 |
+
+#### 5.4.3 配置 PDO 映射
+
+修改 `0x1600`（RPDO）和 `0x1A00`（TPDO）的 subindex0 和 subindex1：
+
+![RPDO 映射配置](/images/canopen-editor/10-rpdo-mapping.png)
+
+### 5.5 导出对象字典文件
+
+![导出文件](/images/canopen-editor/11-export.png)
+
+**操作步骤：**
+
+1. 单击 **File** → **Export CanOpenNode...**
+2. 修改路径为 `middleware/CANopenNode/port/objdict/`
+3. 替换已有的 OD.c/OD.h
+
+**其他导出选项：**
+
+| 选项 | 说明 |
+|------|------|
+| **Save Project As...** | 保存为新的 `.xdd` 文件，下次可直接导入继续开发 |
+| **Save Network XML** | 生成 XML 文档，供其他平台开发使用 |
+
+### 5.6 运行结果验证
+
+编译并烧录 CANopen 从站示例，以 HPM6P00EVK 为例（作为从站），主站使用 CANbox：
+
+#### 5.6.1 初始化阶段
+
+从站运行成功后发送 init(0x00) 包，然后自动切换至 pre-optional 状态，发送 pre-optional(0x7F) 包：
+
+![初始化报文](/images/canopen-editor/12-init-packet.png)
+
+#### 5.6.2 启动阶段
+
+主站发送 start remote node 命令后，从站开始发送 PDO(0xAA) 数据包，同时切换到 optional 状态：
+
+![启动报文](/images/canopen-editor/13-start-remote.png)
+
+#### 5.6.3 TPDO 数据验证
+
+收到 TPDO 数据包，说明对象 0x2102 和 TPDO 属性配置成功：
+
+![TPDO 数据](/images/canopen-editor/14-tpdo-data.png)
+
+#### 5.6.4 SDO 读取验证
+
+通过 SDO 读取 0x2102 的值：
+
+![SDO 读取](/images/canopen-editor/15-sdo-read.png)
+
+#### 5.6.5 SDO 写入验证
+
+通过 SDO 改写 0x2102，PDO 将发送新的值：
+
+![SDO 写入](/images/canopen-editor/16-sdo-write.png)
+
+#### 5.6.6 写入确认
+
+再次读取 0x2102 确认值已被改写为 0xBB：
+
+![SDO 确认](/images/canopen-editor/17-sdo-confirm.png)
+
+### 5.7 小结
+
+CANopenEditor 工具可替代手动修改，简化对象字典的配置过程。hpm_sdk v1.10.0 中的 CANopen demo 对象字典即由该工具编辑、生成，可作为用户实现自定义配置的参考基础。
+
+::: info 参考资料
+- [原文：CANopenEditor 对象字典配置教程](https://mp.weixin.qq.com/s/lP2MnAujXmweel0Bii3RXw) — 先楫半导体 HPM 知识库
+- [CANopenEditor GitHub](https://github.com/CANopenNode/CANopenEditor) — 官方工具仓库
+:::
+
+---
+
+## 6. 多轴同步插补
+
+### 6.1 同步机制
 
 CANopen 通过 SYNC 报文实现**分布式同步**。所有从站在收到 SYNC 的同一微秒内锁存当前位置，在同一微秒内执行 RPDO 中的指令。
 
@@ -585,7 +800,7 @@ CANopen 通过 SYNC 报文实现**分布式同步**。所有从站在收到 SYNC
 
 **关键约束：** 主站必须在每次 SYNC **之前**发送完当前周期的所有 RPDO。
 
-### 5.2 两轴直线插补实现 (CSP 模式)
+### 6.2 两轴直线插补实现 (CSP 模式)
 
 以下代码生成 XY 直线轨迹，每个 SYNC 周期更新两轴目标位置。
 
@@ -637,7 +852,7 @@ int linear_interp_next(linear_interp_t *li, int32_t *x_out, int32_t *y_out) {
 }
 ```
 
-### 5.3 多轴同步精度保障
+### 6.3 多轴同步精度保障
 
 | 因素 | 影响 | 对策 |
 |------|------|------|
@@ -648,9 +863,9 @@ int linear_interp_next(linear_interp_t *li, int32_t *x_out, int32_t *y_out) {
 
 ---
 
-## 6. CiA 402 回零模式详解
+## 7. CiA 402 回零模式详解
 
-### 6.1 回零方法分类
+### 7.1 回零方法分类
 
 | 类别 | 方法编号 | 触发信号 | 特点 |
 |------|---------|---------|------|
@@ -661,7 +876,7 @@ int linear_interp_next(linear_interp_t *li, int32_t *x_out, int32_t *y_out) {
 | 仅索引脉冲 | **33-34** | 编码器 Z | 旋转轴/有限行程轴 |
 | 当前位置归零 | **35** | 无 | 最简单, 将当前位置设为原点 |
 
-### 6.2 方法 1 详解 (负限位 + 索引脉冲, 最常用)
+### 7.2 方法 1 详解 (负限位 + 索引脉冲, 最常用)
 
 ```
                         负限位开关
@@ -681,7 +896,7 @@ int linear_interp_next(linear_interp_t *li, int32_t *x_out, int32_t *y_out) {
 3. 离开限位开关后, 以低速寻找第一个 Z 脉冲
 4. Z 脉冲触发 → 停止, 当前位置 = 原点 + 0x607C 偏移
 
-### 6.3 回零 SDO 配置
+### 7.3 回零 SDO 配置
 
 ```
 节点 2, 方法 1 (负限位 + 索引脉冲):
@@ -708,7 +923,7 @@ int linear_interp_next(linear_interp_t *li, int32_t *x_out, int32_t *y_out) {
   → 控制字 = 0x001F (bit4=1, Homing Operation Start)
 ```
 
-### 6.4 回零状态监控
+### 7.4 回零状态监控
 
 ```
 状态字 bit10=1 → Target Reached (回零完成)
@@ -718,7 +933,7 @@ int linear_interp_next(linear_interp_t *li, int32_t *x_out, int32_t *y_out) {
 bit13=1 时, 通过 EMCY 内容或驱动器厂商对象查看具体原因。
 ```
 
-### 6.5 回零故障排查
+### 7.5 回零故障排查
 
 | 问题 | 原因 | 解决方法 |
 |------|------|---------|
@@ -731,9 +946,9 @@ bit13=1 时, 通过 EMCY 内容或驱动器厂商对象查看具体原因。
 
 ---
 
-## 7. 开发调试清单
+## 8. 开发调试清单
 
-### 7.1 主站开发检查项
+### 8.1 主站开发检查项
 
 - [ ] NMT 命令能否正确控制从站状态切换?
 - [ ] SDO 读写超时处理是否实现? (200ms + 重试 3 次)
@@ -743,7 +958,7 @@ bit13=1 时, 通过 EMCY 内容或驱动器厂商对象查看具体原因。
 - [ ] EMCY 报文是否被正确处理并触发相应保护逻辑?
 - [ ] PDO 映射的字节数与实际发送的数据是否一致?
 
-### 7.2 从站开发检查项
+### 8.2 从站开发检查项
 
 - [ ] EDS 文件中的所有对象是否都在固件中实现?
 - [ ] PDO 映射更改是否需要 Pre-Op 状态? (标准要求 Pre-Op)

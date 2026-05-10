@@ -45,6 +45,23 @@
 
 ### 2.2 核心实现
 
+#### 流式解析状态机
+
+```mermaid
+stateDiagram-v2
+    [*] --> IDLE: 初始化
+    IDLE --> HEAD1: 收到 0x55
+    IDLE --> IDLE: 其他字节(丢弃)
+    HEAD1 --> HEAD2: 收到 0xAA
+    HEAD1 --> IDLE: 其他字节
+    HEAD2 --> RECV_BODY: 接收剩余字段
+    RECV_BODY --> CRC_CHECK: 收到完整帧
+    CRC_CHECK --> IDLE: CRC正确,帧完成
+    CRC_CHECK --> IDLE: CRC错误,丢弃
+```
+
+#### 代码实现
+
 ```c
 // 逐字节输入，状态机驱动
 protocol_err_e protocol_parse_byte(protocol_parser_t *parser, uint8_t byte)
@@ -460,6 +477,30 @@ void recv_cmd(void)
 
 ### 选型要点
 
+```mermaid
+flowchart TD
+    A[数据到达方式?] --> B{一次到齐?}
+    B -->|是| C[批量解析]
+    B -->|否,逐字节到达| D{需要处理粘包/断包?}
+    D -->|是| E[流式解析]
+    D -->|否| F[自行拼接后批量解析]
+    
+    C --> G[适用场景: UDP/文件读取]
+    E --> H[适用场景: 串口/TCP]
+    
+    subgraph 批量解析特点
+        G --> G1[无状态]
+        G1 --> G2[逻辑简单]
+        G2 --> G3[效率高]
+    end
+    
+    subgraph 流式解析特点
+        H --> H1[状态机驱动]
+        H1 --> H2[自动处理粘包/断包]
+        H2 --> H3[实时性好]
+    end
+```
+
 > **数据一次到齐 → 批量解析**
 > **数据滴滴答答 → 流式解析**
 
@@ -479,3 +520,9 @@ Payload 数据中恰好包含 `0x55 0xAA`（与帧头相同），状态机会不
 - 关于 ITLV 协议的完整设计，请参阅 [ITLV 协议设计](./itlv-protocol)
 - 关于转义编码方案，请参阅 [转义协议](./escape-protocol)
 :::
+
+---
+
+## 参考来源
+
+- [嵌入式大杂烩 - 流式解析 vs 一次性解析](https://mp.weixin.qq.com/s/pSLJ0kK9XYvD7xgEOz0QZw)

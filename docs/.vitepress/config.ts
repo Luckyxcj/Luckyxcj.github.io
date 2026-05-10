@@ -286,9 +286,9 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: '概览', link: '/protocols/custom-frame-protocol/' },
+            { text: '流式 vs 批量解析', link: '/protocols/custom-frame-protocol/stream-vs-batch-parsing' },
             { text: '转义协议', link: '/protocols/custom-frame-protocol/escape-protocol' },
             { text: 'ITLV 协议设计', link: '/protocols/custom-frame-protocol/itlv-protocol' },
-            { text: '流式 vs 批量解析', link: '/protocols/custom-frame-protocol/stream-vs-batch-parsing' },
           ],
         },
       ],
